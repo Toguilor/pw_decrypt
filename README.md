@@ -1,6 +1,6 @@
 # PASSWORD DECRYPTION
  
-Implementation of a sequential and a parallel Program for password decrtpting.
+Implementation of a sequential and a parallel Program for password decrypting.
  
 The program generates numbers of passwords needed by the user. 
 
