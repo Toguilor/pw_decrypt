@@ -31,7 +31,7 @@ def decrypt_password(encrypted_password, key):
 
 
 # Generation de la liste des mots de passe à crypter
-passwords_to_encrypt = [generate_random_password() for _ in range(10000000)]  # Liste des mots de passe à crypter
+passwords_to_encrypt = [generate_random_password() for _ in range(1000)]  # Liste des mots de passe à crypter
 #print("Mot de passe genere:", passwords_to_encrypt)
 
 # Clé de chiffrement

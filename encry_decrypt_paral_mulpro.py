@@ -36,13 +36,63 @@ def worker_encrypt(password):
 def worker_decrypt(encrypted_password):
     global key
     return decrypt_password(encrypted_password, key)
+
+def worker_generate_random_password(num_passwords):
+    return [generate_random_password() for _ in range(num_passwords)]
+
 key = "MBertini"
+
 if __name__ == '__main__':
-    passwords_to_encrypt = [generate_random_password() for _ in range(1000000)]
+    num_workers = 0 #multiprocessing.cpu_count()
+    num_passwords = 10000000
+
+    if num_passwords <= 10000:
+        num_workers = 1
+    elif num_passwords <= 100000:
+        num_workers = 2
+    elif num_passwords <= 10000000:
+        num_workers = 16
+    elif num_passwords <= 9000000:
+        num_workers = 10
+    else:
+        num_workers = multiprocessing.cpu_count()
+
+    #Génération de mots de passe
+    start_time_gen_pw = time.time()
+    #passwords_to_encrypt = [generate_random_password() for _ in range(10000000)]
+
+    # Divisez le nombre de mots de passe à générer par le nombre de processus
+    chunk_size = num_passwords // num_workers
+
+    # Créez une liste vide pour stocker les résultats de chaque processus
+    results = []
+
+    # Créez une piscine de processus
+    pool = multiprocessing.Pool(processes=num_workers)
+
+    # Mappez la fonction generate_random_passwords sur chaque processus avec le nombre de mots de passe à générer
+    for _ in range(num_workers):
+        results.append(pool.apply_async(worker_generate_random_password, args=(chunk_size,)))
+
+    # Attendez que tous les processus se terminent et récupérez les résultats
+    pool.close()
+    pool.join()
+
+    # Concaténez les résultats de chaque processus en une seule liste de mots de passe
+    passwords_to_encrypt = []
+    for result in results:
+        passwords_to_encrypt.extend(result.get())
+
+    end_time_gen_pw = time.time()
+    pw_gen_time = end_time_gen_pw - start_time_gen_pw
+
+    #print(passwords_to_encrypt)
+
+    #print(f"Temps de generation de {len(passwords_to_encrypt)} mot de passe: {pw_gen_time}")
 
     start_crypt_time = time.time()
-    num_workers = multiprocessing.cpu_count()
     print(num_workers)
+    print("Nombre de mots de passe: ", num_passwords)
     pool = multiprocessing.Pool(processes=num_workers)
     encrypted_passwords = pool.map(worker_encrypt, passwords_to_encrypt)
     pool.close()
@@ -60,4 +110,4 @@ if __name__ == '__main__':
     end_decrypt_time = time.time()
     exe_decryp_time = round(end_decrypt_time - start_decrypt_time, 4)
 
-    print("\nTemps de decryptage:", exe_decryp_time)
+    print("Temps de decryptage:", exe_decryp_time)
